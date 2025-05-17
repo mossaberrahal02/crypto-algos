@@ -1,0 +1,198 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc} % Utilisation de UTF-8 pour gérer les accents
+\usepackage[french]{babel} % Langue française pour les caractères et l'orthographe
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage[bottom=0.5in]{geometry}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{listings}
+\renewcommand\seriesdefault{bx}
+\usepackage{bold-extra}
+
+\begin{document}
+
+% Page de titre
+{
+\setlength{\topmargin}{-0.5cm}
+\begin{titlepage}
+  \begin{center}
+   \vspace{1cm}
+        {\sc { {\large Université Ibn Tofail} \\ Master Intelligence Artificielle et Cybersécurité}}
+    
+        \vspace{1.2cm}
+    \centerline{\hbox to 13cm{\hrulefill}}
+    \vspace{0.3cm}
+    {\sc \Large  \uppercase{Présentation des algorithmes de cryptographie: \\AES et DES}}
+    \centerline{\hbox to 13cm{\hrulefill}}
+    
+    \vspace{1.2cm}
+
+    \vspace{7cm} 
+    \vspace{0.5cm}
+    \hbox to \textwidth{\hrulefill}
+    \vspace{0.2cm}
+    
+  \end{center}
+\end{titlepage}
+}
+
+\maketitle
+
+\tableofcontents % Table des matières
+
+\newpage
+
+\section{Introduction}
+L'algorithme \textbf{AES (Advanced Encryption Standard)} est un algorithme de chiffrement symétrique largement utilisé pour sécuriser des données. Il a été adopté comme norme en 2001 par le National Institute of Standards and Technology (NIST) pour remplacer le DES (Data Encryption Standard), qui était vulnérable à des attaques par force brute.
+
+AES fonctionne sur des blocs de données de 128 bits et supporte des clés de 128, 192, ou 256 bits. Il est utilisé dans de nombreuses applications telles que les transactions bancaires en ligne, les communications sécurisées et le chiffrement des données.
+
+\newpage
+
+\section{L'algorithme AES}
+\subsection{Détails de l'algorithme AES}
+L'algorithme AES effectue plusieurs rondes de transformations sur les données pour les sécuriser. Le nombre de rondes dépend de la taille de la clé :
+
+\begin{itemize}
+    \item 10 rondes pour une clé de 128 bits,
+    \item 12 rondes pour une clé de 192 bits,
+    \item 14 rondes pour une clé de 256 bits.
+\end{itemize}
+
+Les étapes principales de chaque ronde sont les suivantes :
+\begin{enumerate}
+    \item \textbf{SubBytes} : Chaque byte du bloc est remplacé par un byte de la S-Box (table de substitution).
+    \item \textbf{ShiftRows} : Les lignes du bloc de données sont décalées circulairement.
+    \item \textbf{MixColumns} : Une transformation mathématique est appliquée sur les colonnes.
+    \item \textbf{AddRoundKey} : Un XOR est effectué entre le bloc de données et la clé de la ronde.
+\end{enumerate}
+
+La dernière ronde omet l'étape de \textbf{MixColumns}.
+
+\subsection{Sécurité de l'AES}
+AES est considéré comme très sécurisé et résiste bien aux attaques connues. La taille de la clé (128, 192, 256 bits) garantit une sécurité de haut niveau, même face aux attaques par force brute.
+
+\subsection{Exemple de code AES en C++}
+Voici un exemple d'implémentation simplifiée de l'algorithme AES en C++ :
+
+\begin{lstlisting}[language=C++]
+#include <iostream>
+#include <vector>
+#include <iomanip>
+#include <cassert>
+
+const unsigned char SBox[256] = {
+    // Table de substitution S-Box
+    // (table complète à insérer ici)
+};
+
+const unsigned char Rcon[10] = {
+    0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b
+};
+
+void KeyExpansion(const unsigned char* key, unsigned char* roundKeys) {
+    int i = 0;
+    while (i < 16) {
+        roundKeys[i] = key[i];
+        i++;
+    }
+
+    i = 16;
+    while (i < 176) {
+        unsigned char temp[4];
+        for (int j = 0; j < 4; ++j) {
+            temp[j] = roundKeys[i - 4 + j];
+        }
+
+        if (i % 16 == 0) {
+            unsigned char temp2 = temp[0];
+            for (int j = 0; j < 3; ++j) {
+                temp[j] = temp[j + 1];
+            }
+            temp[3] = temp2;
+
+            // Substitution
+            for (int j = 0; j < 4; ++j) {
+                temp[j] = SBox[temp[j]];
+            }
+
+            temp[0] ^= Rcon[i / 16];
+        }
+
+        for (int j = 0; j < 4; ++j) {
+            roundKeys[i + j] = roundKeys[i - 16 + j] ^ temp[j];
+        }
+
+        i += 4;
+    }
+}
+
+int main() {
+    unsigned char key[16] = { /* ta clé ici */ };
+    unsigned char input[16] = { /* ton texte en clair ici */ };
+    unsigned char output[16];
+
+    // Appliquer AES ici (code à insérer)
+
+    return 0;
+}
+\end{lstlisting}
+
+\newpage
+
+\section{L'algorithme DES (Data Encryption Standard)}
+L'algorithme \textbf{DES} (Data Encryption Standard) est un algorithme de chiffrement symétrique qui a été largement utilisé dans les années 1970. Il fonctionne sur des blocs de 64 bits et utilise une clé de 56 bits. Bien qu'il ait été remplacé par des algorithmes plus sécurisés, comme AES, DES reste une référence pour comprendre les principes de base de la cryptographie symétrique.
+
+Le chiffrement DES repose sur un réseau de Feistel et utilise 16 rondes de transformation pour sécuriser les données. Chaque ronde applique une série de substitutions et permutations à la moitié du bloc de données, et l'autre moitié est modifiée à chaque tour avec l'aide d'une sous-clé.
+
+\subsection{Détails de l'algorithme DES}
+L'algorithme DES procède en plusieurs étapes clés :
+
+\begin{itemize}
+    \item \textbf{Permutation Initiale (IP)} : Le bloc de 64 bits est permuté selon un schéma prédéfini.
+    \item \textbf{Rondes de Feistel} : Le texte est divisé en deux moitiés, et chaque moitié subit 16 rondes successives de transformations.
+    \item \textbf{Fonction f} : La fonction de chaque ronde applique une expansion de la moitié droite, un XOR avec une sous-clé, une substitution par des S-Boxes, et une permutation.
+    \item \textbf{Permutation Finale (FP)} : Après les 16 rondes, les deux moitiés sont combinées et permutées à nouveau.
+\end{itemize}
+
+\subsection{Exemple de code C++ pour l'algorithme DES}
+Voici un exemple d'implémentation simplifiée de l'algorithme DES en C++ :
+
+\begin{lstlisting}[language=C++]
+#include <iostream>
+#include <bitset>
+#include <vector>
+
+using namespace std;
+
+// Définition des tables IP, E, S-box, etc.
+const int IP[64] = {
+    58, 50, 42, 34, 26, 18, 10, 2,
+    60, 52, 44, 36, 28, 20, 12, 4,
+    62, 54, 46, 38, 30, 22, 14, 6,
+    64, 56, 48, 40, 32, 24, 16, 8,
+    57, 49, 41, 33, 25, 17, 9, 1,
+    59, 51, 43, 35, 27, 19, 11, 3,
+    61, 53, 45, 37, 29, 21, 13, 5,
+    63, 55, 47, 39, 31, 23, 15, 7
+};
+
+// Table d'expansion E, etc. (compléter ici)
+
+int main() {
+    bitset<64> input("0000000100100011010001010110011110001001101010111100111111100001");
+    bitset<56> key("0000000000000001000000000000001100000010000100000100000000000000");
+
+    // Code pour l'algorithme DES ici
+
+    return 0;
+}
+\end{lstlisting}
+
+\newpage
+
+\section{Conclusion}
+L'algorithme AES est l'un des standards les plus sûrs pour le chiffrement des données. Grâce à sa structure robuste et ses clés de tailles variées, il offre un haut niveau de sécurité dans une multitude d'applications. L'algorithme DES, bien qu'obsolète aujourd'hui en raison de sa vulnérabilité face aux attaques par force brute, reste une base importante pour comprendre le chiffrement symétrique et les réseaux de Feistel.
+
+\end{document}
